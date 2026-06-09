@@ -12,8 +12,6 @@ class RouteRegistry:
     def __init__(self):
         self.routes: list[Route] = []
 
-    # ── Core ──────────────────────────────────────────────────────────────────
-
     def add_route(
         self,
         path: str,
@@ -22,7 +20,6 @@ class RouteRegistry:
     ) -> None:
         self.routes.append(Route(path, handler, methods=methods))
 
-    # ── Decorators ────────────────────────────────────────────────────────────
 
     def route(self, path: str, methods: list[str] | None = None):
         """Multi-method or method-unrestricted decorator."""
