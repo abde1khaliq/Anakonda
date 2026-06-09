@@ -1,5 +1,7 @@
 import json
 
+# The `Response` class represents an HTTP response object with attributes for status,
+# content, headers, and media type handling.
 class Response:
     media_type: str | None = None
     charset: str = "utf-8"
@@ -42,9 +44,19 @@ class Response:
             )
  
     @staticmethod
+        
     def _coerce_header(
         key: str | bytes, value: str | bytes
     ) -> tuple[bytes, bytes]:
+        """
+        The function `_coerce_header` converts key and value inputs to bytes and lowercases the key, while
+        the `send` method sends an HTTP response with status, headers, and content.
+        
+        :param send: The `send` parameter in the `send` method appears to be a callable function that is
+        used to send data. It is being awaited to send two dictionaries as part of an HTTP response. The
+        first dictionary contains the response status, headers, and the response start type. The second
+        dictionary contains the
+        """
         k = key.encode("latin-1") if isinstance(key, str) else key
         v = value.encode("latin-1") if isinstance(value, str) else value
         return (k.lower(), v)
@@ -60,6 +72,7 @@ class Response:
             "body": self.content,
         })
  
+# The `JSONResponse` class represents a response object with JSON content type in Python.
 class JSONResponse(Response):
     media_type = "application/json"
  
@@ -76,6 +89,8 @@ class JSONResponse(Response):
         )
  
  
+# The code defines classes for different types of HTTP responses including HTML, plain text, and
+# redirect responses.
 class HTMLResponse(Response):
     media_type = "text/html"
  
@@ -83,6 +98,7 @@ class HTMLResponse(Response):
         super().__init__(content=content, status=status, headers=headers)
  
  
+# The `PlainTextResponse` class represents a response with plain text content type in Python.
 class PlainTextResponse(Response):
     media_type = "text/plain"
  
@@ -90,6 +106,8 @@ class PlainTextResponse(Response):
         super().__init__(content=content, status=status, headers=headers)
  
  
+# The `RedirectResponse` class represents a response that redirects to a specified URL with an
+# optional status code and headers.
 class RedirectResponse(Response):
     def __init__(self, url: str, status: int = 307, headers: list | None = None):
         super().__init__(
@@ -99,6 +117,8 @@ class RedirectResponse(Response):
         )
  
  
+# The `StreamingResponse` class is designed to stream the response body using an async
+# generator without specifying the content length upfront.
 class StreamingResponse(Response):
     """
     Streams the body via an async generator.

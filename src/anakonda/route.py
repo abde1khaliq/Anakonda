@@ -30,6 +30,8 @@ def _compile_path(path: str) -> re.Pattern:
     return re.compile(f"^{''.join(result)}$")
 
 
+# The `Route` class represents a route with a path, handler function, and optional methods restriction
+# for a web application.
 class Route:
     def __init__(
         self,
