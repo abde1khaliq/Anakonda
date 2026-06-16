@@ -13,7 +13,6 @@ SCAFFOLD = {
             "factory.py":    "core/factory.jinja",
             "database.py":   "core/database.jinja",
             "exceptions.py": "core/exceptions.jinja",
-            "lifespan.py":   "core/lifespan.jinja",
         },
         "migrations": {
             "__init__.py": "",

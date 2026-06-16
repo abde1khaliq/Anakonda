@@ -2,7 +2,7 @@ MODULE_SLICE = {
     "__init__.py":    "",
     "router.py":      "module/router.jinja",
     "controller.py":  "module/controller.jinja",
-    "service.py":     "module/service.jinja",
+    "services.py":     "module/services.jinja",
     "repository.py":  "module/repository.jinja",
     "schemas.py":     "module/schemas.jinja",
     "models.py":      "module/models.jinja",
