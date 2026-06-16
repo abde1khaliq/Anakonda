@@ -26,4 +26,8 @@ SCAFFOLD = {
             "types.py": "",
         },
     },
+    "tests": {},
+    ".env": "",
+    ".gitignore": "",
+    "README.md": ""
 }
