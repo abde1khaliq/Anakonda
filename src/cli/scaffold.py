@@ -1,18 +1,16 @@
 SCAFFOLD = {
     "app": {
         "__init__.py": "",
-        "main.py":     "main.jinja",
+        "main.py": "main.jinja",
         "config": {
-            "__init__.py":    "",
-            "base.py":        "config/base.jinja",
-            "development.py": "config/development.jinja",
-            "production.py":  "config/production.jinja",
+            "__init__.py": "",
+            "settings.py": "config/settings.jinja",
         },
         "core": {
-            "__init__.py":   "",
-            "factory.py":    "core/factory.jinja",
-            "database.py":   "core/database.jinja",
+            "__init__.py": "",
+            "database.py": "core/database.jinja",
             "exceptions.py": "core/exceptions.jinja",
+            "dependencies.py": "core/dependencies.jinja",
         },
         "migrations": {
             "__init__.py": "",
@@ -20,14 +18,14 @@ SCAFFOLD = {
         },
         "modules": {},
         "shared": {
-            "models":  {},
+            "models": {},
             "schemas": {},
-            "utils":   {},
+            "utils": {},
             "types.py": "",
         },
     },
     "tests": {},
     ".env": "",
     ".gitignore": "",
-    "README.md": ""
+    "README.md": "",
 }

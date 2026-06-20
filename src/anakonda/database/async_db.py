@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
 
 from sqlalchemy import text
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 
 class AsyncDatabase:
@@ -23,29 +23,30 @@ class AsyncDatabase:
             pool_pre_ping=True,
             echo=echo,
         )
+        self._session_factory = async_sessionmaker(
+            self._engine, expire_on_commit=False, class_=AsyncSession
+        )
 
-        self._session_factory = async_sessionmaker(self._engine, expire_on_commit=False)
+    @asynccontextmanager
+    async def session(self):
+        """Internal — QueryManager consumes this. Users never call it directly."""
+        session = self._session_factory()
+        try:
+            yield session
+            await session.commit()
+        except Exception:
+            await session.rollback()
+            raise
+        finally:
+            await session.close()
 
-        @asynccontextmanager
-        async def session(self):
-            """Internal — QueryManager consumes this. Users never call it directly."""
-            session = self._session_factory()
-            try:
-                yield session
-                await session.commit()
-            except Exception:
-                await session.rollback()
-                raise
-            finally:
-                await session.close()
+    async def health_check(self) -> bool:
+        try:
+            async with self._engine.connect() as conn:
+                await conn.execute(text("SELECT 1"))
+            return True
+        except Exception:
+            return False
 
-        async def health_check(self) -> bool:
-            try:
-                async with self._engine.connect() as conn:
-                    await conn.execute(text("SELECT 1"))
-                return True
-            except Exception:
-                return False
-
-        async def close(self) -> None:
-            await self._engine.dispose()
+    async def close(self) -> None:
+        await self._engine.dispose()
