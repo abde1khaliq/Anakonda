@@ -2,7 +2,7 @@
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 
-from .base import BaseDatabaseConfig
+from anakonda.db.base import BaseDatabaseConfig
 
 
 class Database(BaseDatabaseConfig):

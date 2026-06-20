@@ -1,6 +1,3 @@
-from sqlalchemy import text
-
-
 class BaseDatabaseConfig:
     def __init__(
         self,

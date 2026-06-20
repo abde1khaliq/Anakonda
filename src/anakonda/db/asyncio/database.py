@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from ..base import BaseDatabaseConfig
+from anakonda.db.base import BaseDatabaseConfig
 
 
 class AsyncDatabase(BaseDatabaseConfig):
