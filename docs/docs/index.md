@@ -8,6 +8,11 @@ icon: lucide/rocket
 
 ![Anakonda Logo](https://ik.imagekit.io/cin2tn3bj/anakonda_logo.png)
 
+![PyPI](https://img.shields.io/pypi/v/anakonda.py)
+![Python Versions](https://img.shields.io/pypi/pyversions/anakonda.py)
+![License](https://img.shields.io/github/license/abde1khaliq/anakonda)
+![Discord](https://img.shields.io/discord/1518323557103571094?logo=discord&label=chat)
+
 - **Source:** [github.com/abde1khaliq/anakonda](https://github.com/abde1khaliq/anakonda)
 - **Documentation:** [abde1khaliq.github.io/Anakonda/](https://abde1khaliq.github.io/Anakonda/)
 
