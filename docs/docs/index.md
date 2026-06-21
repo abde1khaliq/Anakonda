@@ -9,7 +9,7 @@ icon: lucide/rocket
 ![Anakonda Logo](https://ik.imagekit.io/cin2tn3bj/anakonda_logo.png)
 
 - **Source:** [github.com/abde1khaliq/anakonda](https://github.com/abde1khaliq/anakonda)
-- **Documentation:** [github.com/abde1khaliq/anakonda](https://github.com/abde1khaliq/anakonda)
+- **Documentation:** [abde1khaliq.github.io/Anakonda/](https://abde1khaliq.github.io/Anakonda/)
 
 </div>
 
