@@ -14,6 +14,8 @@ SCAFFOLD = {
         },
         "migrations": {
             "__init__.py": "",
+            "env.py": "migrations/env.jinja",
+            "script.py.mako": "migrations/script.jinja",
             "versions": {},
         },
         "modules": {},
@@ -28,4 +30,5 @@ SCAFFOLD = {
     ".env": "",
     ".gitignore": "",
     "README.md": "",
+    "alembic.ini": "alembic.ini.jinja", 
 }
