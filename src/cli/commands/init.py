@@ -13,18 +13,6 @@ from cli.scaffold import SCAFFOLD
 from cli.style import Q_STYLE, console
 
 
-def _header() -> None:
-    console.print()
-    console.print(
-        Panel.fit(
-            "[bold]Anakonda[/bold]",
-            border_style="muted",
-            padding=(0, 3),
-        )
-    )
-    console.print()
-
-
 def _next_steps(name: str) -> None:
     console.print(
         Panel(
@@ -41,7 +29,6 @@ def _next_steps(name: str) -> None:
 
 
 def run_init(project_name: Optional[str]) -> None:
-    _header()
 
     if not project_name:
         project_name = questionary.text(
