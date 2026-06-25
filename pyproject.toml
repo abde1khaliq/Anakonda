@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "kribton"
-version = "1.0.3"
+version = "1.0.4"
 authors = [
   { name="Ahmed Abdelkhaliq", email="abdelkhaliqqq@gmail.com" },
 ]
@@ -43,4 +43,4 @@ kribton = "cli.main:app"
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["kribton*"]
+include = ["kribton*", "cli"]
