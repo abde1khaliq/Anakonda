@@ -6,10 +6,10 @@ icon: lucide/rocket
 
 <div class="ana-hero" markdown>
 
-![Kribton Logo](https://ik.imagekit.io/cin2tn3bj/kribton_logo.png)
+![Kribton Logo](https://ik.imagekit.io/cin2tn3bj/kribton_logo_no_bg.png)
 
-![PyPI](https://img.shields.io/pypi/v/kribton.py)
-![Python Versions](https://img.shields.io/pypi/pyversions/kribton.py)
+![PyPI](https://img.shields.io/pypi/v/kribton)
+![Python Versions](https://img.shields.io/pypi/pyversions/kribton)
 ![License](https://img.shields.io/github/license/abde1khaliq/kribton)
 ![Discord](https://img.shields.io/discord/1518323557103571094?logo=discord&label=chat)
 
@@ -30,7 +30,7 @@ Kribton is built directly on the [ASGI](https://asgi.readthedocs.io/) specificat
 ## Installation
 
 ```bash
-pip install kribton.py
+pip install kribton
 ```
 
 Kribton comes in with a built-in CLI (command-line interface) for the framework to ease the use, so to confirm the installation was successful, run:

@@ -14,11 +14,8 @@ nav = [
 ]
 
 [project.theme]
-favicon = "https://ik.imagekit.io/cin2tn3bj/kribton_favicon.png"
-logo = "https://ik.imagekit.io/cin2tn3bj/kribton_favicon.png"
-
-[project.extra_css]
-files = ["assets/css/custom.css"]
+favicon = "https://ik.imagekit.io/cin2tn3bj/kribton_favicone.png"
+logo = "https://ik.imagekit.io/cin2tn3bj/kribton_favicone.png"
 
 
 language = "en"
