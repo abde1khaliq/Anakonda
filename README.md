@@ -1,5 +1,5 @@
 
-![Logo](https://ik.imagekit.io/cin2tn3bj/kribton_logo_white.png)
+![Logo](https://ik.imagekit.io/cin2tn3bj/kribton_logo_no_bg.png)
 ## Kribton - A performative Python Web Framework
 
 Kribton is a modern, high-performance, web framework for building APIs with Python.
@@ -16,7 +16,7 @@ Kribton is a modern, high-performance, web framework for building APIs with Pyth
 Just run the pip command and you're all set!
 
 ```bash
-pip install kribton.py
+pip install kribton
 ```
 
 
