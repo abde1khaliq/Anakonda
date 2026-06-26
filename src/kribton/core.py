@@ -15,7 +15,7 @@ class Kribton:
         self.routes.extend(router.routes)
 
     def add_route(self, path, handler):
-        self.routes.append(Route(path, handler))
+        self.routes.append(Route(path, handler, methods))
 
     async def __call__(self, scope, receive, send):
         request = Request(scope, receive)
