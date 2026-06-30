@@ -22,6 +22,7 @@ class Kribton:
 
         for route in self.routes:
             if route.matches(scope):
+                request.path_params = route.extract_params(scope)
                 response = await route.handler(request)
                 await response.send(send)
                 return

@@ -11,6 +11,7 @@ class Request:
         self.headers = [
             (m.decode(), n.decode()) for m, n in self._scope.get("headers", [])
         ]
+        self.path_params = {}
 
     async def body(self):
         if self._body is None:

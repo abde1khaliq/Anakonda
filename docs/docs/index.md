@@ -65,18 +65,30 @@ from kribton import Router
 
 router = Router()
 router.append_route("/users", users_handler)
+router.append_route("/users/{id}", get_user_handler)
 app.add_router(router)
 ```
 
 - `Route` pairs a `path` with a `handler` and an optional list of HTTP `methods` (defaults to `["GET"]`).
-- `Route.matches(scope)` checks both the path and method (case-insensitive) against the incoming ASGI scope.
+- **Path parameters** are supported using `{name}` segments — e.g. `/users/{id}` or `/posts/{post_id}/comments/{comment_id}`. Each `{name}` matches exactly one path segment (no slashes) and is compiled into a regex once when the `Route` is created.
+- Captured parameters are available in the handler via `request.path_params`, a `dict` keyed by parameter name (always strings — no automatic type coercion yet).
+- `Route.matches(scope)` checks both the path pattern and method (case-insensitive) against the incoming ASGI scope.
 - `Router` is a lightweight collection that accumulates `Route` objects via `append_route` and can be merged into the app with `add_router`.
+
+```python
+async def get_user(request):
+    user_id = request.path_params["id"]
+    return Response({"id": user_id})
+
+router.append_route("/users/{id}", get_user)
+```
 
 ### Requests
 
 Every handler receives a `Request` built from the ASGI `scope`/`receive` pair:
 
 - `request.path` and `request.method` — decoded straight from the ASGI scope.
+- `request.path_params` — `dict` of values captured from `{name}` segments in the matched route's path (empty `dict` if the route has no path parameters).
 - `request.headers` — list of `(name, value)` tuples, decoded from bytes.
 - `await request.body()` — buffers and concatenates the full request body across ASGI `http.request` messages.
 - `await request.json()` — parses the body as JSON, returning `{}` if parsing fails (never raises).
