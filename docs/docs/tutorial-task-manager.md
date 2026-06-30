@@ -14,7 +14,7 @@ If you haven't read **[Getting Started](getting-started.md)** yet, do that first
 pip install kribton sqlalchemy aiosqlite
 ```
 
-Create a single file, `main.py`. We'll build it up piece by piece.
+Create a project folder with two files: `main.py` (the app) and `init_db.py` (a one-time setup script). We'll build both up piece by piece.
 
 ## 2. Define the database and model
 
@@ -35,7 +35,7 @@ class Task(BaseModel):
 Creating `AsyncDatabase` automatically registers itself as the backend for every `BaseModel` subclass — that's why `Task.objects` will work without any extra wiring. See **[Database](database.md)** and **[Models](models.md)** for the full details.
 
 !!! note
-    Kribton doesn't include a migrations tool. For this tutorial, create the table directly via SQLAlchemy's metadata before running the app — see [step 7](#7-create-the-table) below.
+    Kribton doesn't include a migrations tool. For this tutorial, we'll create the table once with a small setup script — see [step 7](#7-set-up-the-database).
 
 ## 3. List all tasks
 
@@ -83,7 +83,11 @@ async def update_task(request):
     task_id = request.path_params["id"]
     data = await request.json()
 
-    task = await Task.objects.update(task_id, **data)
+    try:
+        task = await Task.objects.update(task_id, **data)
+    except AttributeError:
+        return Response({"error": "invalid field in request body"}, status=400)
+
     if task is None:
         return Response({"error": "task not found"}, status=404)
     return Response(task)
@@ -98,26 +102,29 @@ async def delete_task(request):
 ```
 
 !!! warning
-    `update_task` passes the entire request body straight into `.update(**data)`. If the client sends a field that isn't a real column on `Task`, this will raise `AttributeError` and crash the request — Kribton has no built-in exception handling yet. Keep client input to known fields until that's added, or wrap the call in a `try`/`except` yourself:
+    `update_task` passes the request body straight into `.update(**data)`. If the client sends a field that isn't a real column on `Task`, this raises `AttributeError` — which is why it's caught explicitly above. Kribton doesn't have global exception-handling middleware yet, so unhandled errors elsewhere will still surface as a generic failure.
+
+## 7. Set up the database
+
+Kribton doesn't run any code automatically on startup, so table creation happens via a small standalone script, run once before you start the server.
+
+**`init_db.py`:**
 
 ```python
-    try:
-        task = await Task.objects.update(task_id, **data)
-    except AttributeError:
-        return Response({"error": "invalid field in request body"}, status=400)
-```
+import asyncio
 
-## 7. Create the table
+from main import db
+from kribton.models import BaseModel
 
-Since Kribton has no migrations tool, create the table once at startup using SQLAlchemy's metadata directly, via the engine on your `AsyncDatabase`:
 
-```python
 async def init_db():
     async with db._engine.begin() as conn:
         await conn.run_sync(BaseModel.metadata.create_all)
-```
 
-You'll call this once before serving requests — see step 9.
+
+if __name__ == "__main__":
+    asyncio.run(init_db())
+```
 
 ## 8. Wire up routes
 
@@ -138,8 +145,6 @@ app.add_router(router)
 ## 9. Full `main.py`
 
 ```python
-import asyncio
-
 from kribton import Kribton, Router, Response
 from kribton.db.asyncio import AsyncDatabase
 from kribton.models import BaseModel
@@ -201,18 +206,12 @@ router.append_route("/tasks/{id:int}", delete_task, methods=["DELETE"])
 
 app = Kribton(title="Task Manager")
 app.add_router(router)
-
-
-async def init_db():
-    async with db._engine.begin() as conn:
-        await conn.run_sync(BaseModel.metadata.create_all)
-
-asyncio.run(init_db())
 ```
 
 ## 10. Run it
 
 ```bash
+python init_db.py        # one-time: creates tasks.db and the tasks table
 uvicorn main:app --reload
 ```
 
@@ -240,9 +239,10 @@ curl -X DELETE localhost:8000/tasks/1
 
 Being upfront about the current framework's limits, so you don't hit surprises:
 
-- **No exception handling middleware** — any unhandled error (besides the `AttributeError` we explicitly caught above) will crash the request rather than returning a clean 500. See the warning in [step 6](#6-update-and-delete-a-task).
-- **No request body validation/schema** — the `"title" not in data` check above is manual; there's no Pydantic-style model validation built in despite SQLAlchemy/Pydantic being mentioned as ecosystem integrations.
-- **No query string parsing** — you can't do `GET /tasks?done=false` yet; filtering by status would currently need a separate route or a body-based approach.
-- **No migrations tool** — `create_all` is fine for a tutorial/SQLite, but isn't a real migration strategy for schema changes over time.
+- **No global exception handling** — any unhandled error (besides the `AttributeError` we caught explicitly above) will crash the request rather than returning a clean 500.
+- **No request body validation/schema** — the `"title" not in data` check above is manual; there's no built-in validation layer.
+- **No query string parsing** — you can't do `GET /tasks?done=false` yet.
+- **No migrations tool** — `create_all` works for a tutorial/SQLite, but isn't a real migration strategy for schema changes over time.
+- **No startup/shutdown hooks** — that's why database setup lives in a separate `init_db.py` script rather than running automatically when the server starts.
 
 For the full list of what's implemented versus planned, see the framework overview on the **[home page](index.md)**.
