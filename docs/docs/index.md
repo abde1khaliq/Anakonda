@@ -26,11 +26,144 @@ Kribton is a lightning‑fast Python web framework built for developers who want
 
 Kribton is built directly on the [ASGI](https://asgi.readthedocs.io/) specification, runs on Uvicorn (or Hypercorn/Daphne) in production, and integrates with the existing Python ecosystem like SQLAlchemy, Pydantic, Jinja2 rather than reinventing it.
 
-
 ## Installation
 
 ```bash
 pip install kribton
 ```
 
+Kribton comes in with a built-in CLI (command-line interface) for the framework to ease the use, so to confirm the installation was successful, run:
+
+```bash
+kribton
+```
+
 Now you're all set, it's installed on your machine!
+
+## Features
+
+### Application core
+
+The `Kribton` class is the ASGI entrypoint for your app.
+
+```python
+from kribton import Kribton
+
+app = Kribton(title="My API", description="A demo service")
+```
+
+- Optional `title` and `description` metadata for the app.
+- `add_router(router)` mounts all routes registered on a `Router` instance.
+- `add_route(path, handler, methods)` registers a single route directly on the app.
+- Implements `__call__(scope, receive, send)`, so any ASGI server (Uvicorn, Hypercorn, Daphne) can run it directly.
+- Walks registered routes on every request and dispatches to the first match; if nothing matches, it automatically returns a `404 Not Found` response.
+
+### Routing
+
+```python
+from kribton import Router
+
+router = Router()
+router.append_route("/users", users_handler)
+app.add_router(router)
+```
+
+- `Route` pairs a `path` with a `handler` and an optional list of HTTP `methods` (defaults to `["GET"]`).
+- `Route.matches(scope)` checks both the path and method (case-insensitive) against the incoming ASGI scope.
+- `Router` is a lightweight collection that accumulates `Route` objects via `append_route` and can be merged into the app with `add_router`.
+
+### Requests
+
+Every handler receives a `Request` built from the ASGI `scope`/`receive` pair:
+
+- `request.path` and `request.method` — decoded straight from the ASGI scope.
+- `request.headers` — list of `(name, value)` tuples, decoded from bytes.
+- `await request.body()` — buffers and concatenates the full request body across ASGI `http.request` messages.
+- `await request.json()` — parses the body as JSON, returning `{}` if parsing fails (never raises).
+
+### Responses
+
+`Response` figures out the right content type for you based on what you pass in:
+
+- `dict` / `list` → serialized to JSON with `application/json`.
+- `str` → sent as-is with `text/plain`.
+- `bytes` / `bytearray` → sent as-is with `application/octet-stream`.
+- Anything else → falls back to `str(content)` as `text/plain`.
+- Custom `status` code and `headers` can be supplied to override the defaults.
+- `await response.send(send)` emits the ASGI `http.response.start` / `http.response.body` messages.
+
+### Database configuration
+
+`BaseDatabaseConfig` centralizes SQLAlchemy connection pool settings shared by all database backends:
+
+- `url`, `pool_size` (default `5`), `max_overflow` (default `10`), `pool_timeout` (default `30`), `pool_recycle` (default `1800`), `echo` (default `False`).
+- Pools are created with `pool_pre_ping=True` to avoid stale connections.
+
+### Async database
+
+`AsyncDatabase` builds on `BaseDatabaseConfig` to provide a SQLAlchemy async engine and session factory:
+
+```python
+from kribton.db.asyncio import AsyncDatabase
+
+db = AsyncDatabase(url="postgresql+asyncpg://user:pass@localhost/db")
+```
+
+- Creates an `AsyncEngine` via `create_async_engine` and an `async_sessionmaker` (`expire_on_commit=False`).
+- Registering an `AsyncDatabase` automatically wires it up as the database backend for all `BaseModel` subclasses.
+- `async with db.session() as session:` — yields a session, auto-commits on success, auto-rolls back and re-raises on error, and always closes the session.
+- `await db.health_check()` — runs `SELECT 1` and returns `True`/`False` instead of raising.
+- `await db.close()` — disposes of the underlying engine pool.
+
+### Models
+
+`BaseModel` is a thin layer on top of SQLAlchemy's `DeclarativeBase`:
+
+```python
+from kribton.models import BaseModel
+from sqlalchemy.orm import Mapped, mapped_column
+
+class User(BaseModel):
+    __tablename__ = "users"
+    id: Mapped[int] = mapped_column(primary_key=True)
+```
+
+- Every subclass that defines `__tablename__` is automatically tracked in a class-level `_registry`.
+- Models expose an `objects` attribute (a `QueryManagerDescriptor`) for querying without manually instantiating a query manager.
+- Accessing `Model.objects` lazily resolves the correct query manager from the database registered via `BaseModel._db`, and raises a clear `RuntimeError` if no database has been initialized yet.
+- The resolved manager is cached on the class as `_objects_cache` after first access.
+
+### Query managers
+
+- `BaseQueryManager` simply pairs a `model` with its `db` connection — the base class all query managers build on.
+- `AsyncQueryManager` (used automatically by `AsyncDatabase`) currently provides:
+  - `await Model.objects.all()` — runs a `SELECT` over all rows for the model and returns them as a list of plain dicts.
+  - `serialize(obj)` — converts a SQLAlchemy model instance into a `{column_name: value}` dict using its table's columns.
+
+## Quick example
+
+Putting the pieces together:
+
+```python
+from kribton import Kribton, Router, Response
+from kribton.db.asyncio import AsyncDatabase
+from kribton.models import BaseModel
+from sqlalchemy.orm import Mapped, mapped_column
+
+db = AsyncDatabase(url="sqlite+aiosqlite:///./app.db")
+
+class User(BaseModel):
+    __tablename__ = "users"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str]
+
+async def list_users(request):
+    users = await User.objects.all()
+    return Response(users)
+
+router = Router()
+router.append_route("/users", list_users)
+
+app = Kribton(title="My API")
+app.add_router(router)
+```

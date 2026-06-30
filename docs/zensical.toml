@@ -21,8 +21,8 @@ logo = "https://ik.imagekit.io/cin2tn3bj/kribton_favicone.png"
 language = "en"
 features = [
     "announce.dismiss",
-    "content.action.edit",
-    "content.action.view",
+    # "content.action.edit",
+    # "content.action.view",
     "repo.metadata",
     "content.code.annotate",
     "content.code.copy",
