@@ -18,6 +18,18 @@ app.add_router(router)
 - `Route.matches(scope)` checks both the path pattern and method (case-insensitive) against the incoming ASGI scope.
 - `Router` is a lightweight collection that accumulates `Route` objects via `append_route` and can be merged into the app with `add_router`.
 
+### `Router.append_route(path, handler, methods=None)`
+
+- `path` — the route path, supports `{name}` / `{name:type}` segments (see below).
+- `handler` — an async callable taking a `Request` and returning a `Response`.
+- `methods` — optional list of HTTP methods (e.g. `["GET", "POST"]`). Defaults to `["GET"]` if omitted, matching `Route`'s own default.
+
+```python
+router.append_route("/tasks", list_tasks, methods=["GET"])
+router.append_route("/tasks", create_task, methods=["POST"])
+router.append_route("/tasks/{id:int}", update_task, methods=["PATCH"])
+```
+
 ## Path parameters
 
 Path parameters are supported using `{name}` segments — e.g. `/users/{id}` or `/posts/{post_id}/comments/{comment_id}`. Each `{name}` matches exactly one path segment (no slashes) and is compiled into a regex once when the `Route` is created.
